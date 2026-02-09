@@ -1,0 +1,27 @@
+backend:
+  name: test-repo
+  # In production, change this back to:
+  # name: github
+  # repo: your-username/your-repo
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "data"
+    label: "Data"
+    files:
+      - name: "updates"
+        label: "Legal Updates"
+        file: "public/data/updates.json"
+        fields:
+          - name: "updates"
+            label: "Updates List"
+            widget: "list"
+            fields:
+              - {label: "ID", name: "id", widget: "uuid"}
+              - {label: "Title (English)", name: "title", widget: "string"}
+              - {label: "Date", name: "date", widget: "datetime", date_format: "MMMM DD, YYYY", time_format: false}
+              - {label: "Summary (English)", name: "summary", widget: "text"}
+              - {label: "Main Image", name: "image", widget: "image"}
+              - {label: "Content Paragraphs", name: "content", widget: "list", field: {widget: "text"}}

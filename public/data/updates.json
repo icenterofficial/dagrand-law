@@ -1,0 +1,46 @@
+{
+  "updates": [
+    {
+      "id": "1",
+      "date": "OCTOBER 24, 2024",
+      "title": "New Regulation on Taxation of Digital Goods in Cambodia",
+      "summary": "The General Department of Taxation has issued new guidelines regarding VAT on digital goods and services provided by non-resident entities...",
+      "content": [
+          "In a significant move to modernize its tax framework, the General Department of Taxation (GDT) of Cambodia has issued new detailed guidelines regarding the implementation of Value Added Tax (VAT) on digital goods and services provided by non-resident entities. This regulation aims to level the playing field between local and international digital service providers and capture revenue from the growing digital economy.",
+          "The new regulation defines 'digital goods' to include software, applications, digital media (such as music, movies, and e-books), and online games. 'Digital services' cover a broad range of activities, including data hosting, online advertising, cloud computing services, and streaming platforms. Non-resident entities that do not have a permanent establishment in Cambodia but supply these goods or services to consumers in Cambodia are now required to register for Simplified VAT if their annual turnover exceeds the threshold set by the GDT.",
+          "Under the simplified mechanism, non-resident suppliers must file VAT returns and pay the tax monthly. However, unlike the standard VAT regime, they are not allowed to claim input VAT credits. This measure simplifies the compliance burden for foreign companies while ensuring that VAT is collected on consumption within Cambodia.",
+          "For Cambodian businesses (B2B transactions), the reverse charge mechanism applies. This means that if a local registered taxpayer purchases digital services from a non-resident, the local company must declare and pay the 10% VAT on behalf of the supplier. This ensures that the tax burden does not fall solely on the consumer but is integrated into the broader tax system.",
+          "We advise all clients engaged in digital commerce to review their obligations under this new regulation. Failure to comply may result in penalties and interest. Our tax team is available to assist with registration, filing, and advisory services to ensure full compliance with the Cambodian tax laws."
+      ],
+      "image": "https://picsum.photos/id/20/600/400"
+    },
+    {
+      "id": "2",
+      "date": "SEPTEMBER 10, 2024",
+      "title": "Updates to the Labour Law: Pension Scheme Implementation",
+      "summary": "Key changes to the National Social Security Fund (NSSF) pension scheme have been announced, affecting both employers and employees...",
+      "content": [
+          "The Ministry of Labour and Vocational Training, in conjunction with the National Social Security Fund (NSSF), has announced key updates to the implementation of the pension scheme for private sector employees. This development marks a major step towards providing long-term social security and financial stability for the Cambodian workforce.",
+          "The new pension scheme is mandatory for all enterprises registered under the Labour Law. Both employers and employees are required to make monthly contributions to the pension fund. The contribution rate is set as a percentage of the employee's contributory wage, with the cost shared equally between the employer and the employee. The funds collected will be managed by the NSSF to provide retirement benefits, invalidity pensions, and survivor benefits.",
+          "Employers must ensure that they are registered with the NSSF for the pension scheme and that they deduct the correct amount from their employees' salaries. The contributions must be remitted to the NSSF by the deadline each month. Failure to register or pay contributions on time can lead to fines and legal action.",
+          "The implementation will be rolled out in phases. The first phase focuses on compulsory contributions for all registered enterprises. Future phases may introduce voluntary contributions for self-employed individuals and additional benefits. This scheme is designed to replace the seniority indemnity payment for retirement, although transition rules apply for existing seniority payments.",
+          "Dagrand Law Office recommends that all employers review their payroll systems and communicate these changes to their employees. Understanding the calculation methods and contribution caps is crucial for compliance. We offer training and advisory services to help your HR department navigate these new requirements seamlessly."
+      ],
+      "image": "https://picsum.photos/id/24/600/400"
+    },
+    {
+      "id": "3",
+      "date": "AUGUST 15, 2024",
+      "title": "Investment Law: New Incentives for Green Energy Projects",
+      "summary": "The Council for the Development of Cambodia (CDC) has released a sub-decree detailing specific tax incentives for renewable energy investments...",
+      "content": [
+          "Reaffirming its commitment to sustainable development, the Council for the Development of Cambodia (CDC) has released a new sub-decree detailing specific tax incentives for investments in green energy and renewable resources. This initiative supports the Royal Government of Cambodia’s strategic plan to increase the share of renewable energy in the national grid and reduce carbon emissions.",
+          "The incentives apply to Qualified Investment Projects (QIPs) involved in solar energy, wind power, biomass, and hydro energy, as well as projects focused on energy efficiency and waste-to-energy solutions. Eligible projects can benefit from a tax holiday on income tax for up to 9 years, followed by a reduced tax rate for a specified period. Additionally, import duties on construction materials and equipment used for these projects are exempted.",
+          "To qualify, investors must demonstrate that their projects meet specific environmental standards and contribute to technology transfer and local capacity building. The application process has been streamlined through the CDC’s online portal, allowing for faster approval times.",
+          "Beyond tax breaks, the government is also working on improving the regulatory framework for Power Purchase Agreements (PPAs) to ensure a stable market for independent power producers (IPPs). This creates a favorable environment for both foreign and local investors looking to enter the Cambodian energy market.",
+          "Investors interested in the green energy sector should consult with legal experts to understand the full scope of benefits and the application procedure. Dagrand Law Office has a dedicated Energy and Mining practice that can assist with QIP registration, environmental compliance, and contract negotiations."
+      ],
+      "image": "https://picsum.photos/id/48/600/400"
+    }
+  ]
+}

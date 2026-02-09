@@ -1,0 +1,37 @@
+
+{
+  "users": [
+    {
+      "id": "u1",
+      "name": "Mr. CHAN Sokyana",
+      "email": "soky@dagrand.net",
+      "role": "admin",
+      "avatar": "https://ui-avatars.com/api/?name=Soky&background=b49b67&color=fff",
+      "password": "123"
+    },
+    {
+      "id": "u2",
+      "name": "Mr. FU Tianxin",
+      "email": "tianxin@dagrand.net",
+      "role": "editor",
+      "avatar": "https://ui-avatars.com/api/?name=Tianxin&background=153c63&color=fff",
+      "password": "123"
+    },
+    {
+      "id": "demo_admin",
+      "name": "Demo Admin",
+      "email": "admin@dagrand.nex",
+      "role": "admin",
+      "avatar": "https://ui-avatars.com/api/?name=Admin&background=0f2b4a&color=fff",
+      "password": "123"
+    },
+    {
+      "id": "demo_author",
+      "name": "Demo Author",
+      "email": "author@dagrand.nex",
+      "role": "editor",
+      "avatar": "https://ui-avatars.com/api/?name=Author&background=b49b67&color=fff",
+      "password": "123"
+    }
+  ]
+}
