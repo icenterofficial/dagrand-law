@@ -238,7 +238,11 @@ const Navbar = () => {
               <div className="relative" ref={settingsRef}>
                   <button
                     onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                    className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 ${isSettingsOpen ? 'bg-brand-gold text-white rotate-90' : 'text-white/80 hover:bg-white/10 hover:text-brand-gold'}`}
+                    className={`flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300 border backdrop-blur-sm ${
+                        isSettingsOpen 
+                        ? 'bg-brand-gold border-brand-gold text-white rotate-90 shadow-lg' 
+                        : 'bg-white/5 border-white/20 text-gray-200 hover:bg-white/10 hover:border-white/30 hover:text-white'
+                    }`}
                   >
                     <Settings className="h-4 w-4" />
                   </button>
@@ -256,9 +260,9 @@ const Navbar = () => {
             {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setIsOpen(true)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-200 hover:text-white hover:bg-white/10 focus:outline-none transition-colors"
+              className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/20 backdrop-blur-sm text-gray-200 hover:text-white hover:bg-white/10 hover:border-white/30 focus:outline-none transition-all duration-300"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>
