@@ -232,11 +232,11 @@ const UpdateDetail = () => {
                <div className="lg:col-span-8">
                    <Section>
                        <div className="prose prose-lg dark:prose-invert prose-headings:font-serif prose-headings:text-brand-navy dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-300 prose-p:font-light prose-p:leading-loose prose-a:text-brand-gold hover:prose-a:text-brand-navy max-w-none first-letter:text-5xl first-letter:font-serif first-letter:text-brand-gold first-letter:mr-3 first-letter:float-left">
-                           <p className="lead font-medium text-xl text-brand-navy dark:text-white italic mb-8 border-l-4 border-brand-gold pl-4">
+                           <p className="lead font-medium text-xl text-brand-navy dark:text-white italic mb-8 border-l-4 border-brand-gold pl-4 text-justify leading-loose">
                                {update.summary}
                            </p>
                            {update.content.map((paragraph, idx) => (
-                               <p key={idx}>{paragraph}</p>
+                               <p key={idx} className="mb-8 text-justify leading-loose text-gray-700 dark:text-gray-300 font-light">{paragraph}</p>
                            ))}
                        </div>
                         
