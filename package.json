@@ -16,7 +16,8 @@
     "framer-motion": "11.0.24",
     "react-helmet-async": "2.0.4",
     "@supabase/supabase-js": "2.39.8",
-    "sonner": "1.4.3"
+    "sonner": "1.4.3",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
