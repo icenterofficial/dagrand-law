@@ -109,7 +109,19 @@ export const TRANSLATIONS = {
     adjustFilters: "Try adjusting your search or filters.",
     clearFilters: "Clear Filters",
     disclaimerTitle: "Legal Disclaimer",
-    disclaimerText: "The information provided in this article is for general knowledge and information sharing purposes only and does not constitute formal legal advice. Accessing or reading this information does not create an attorney-client relationship between the reader and Dagrand Law Office. While we strive to ensure the accuracy of the information, laws and regulations are subject to change. Readers should not act upon this information without seeking professional legal counsel specific to their situation. Dagrand Law Office assumes no liability for any actions taken or not taken based on the contents of this article."
+    disclaimerText: "The information provided in this article is for general knowledge and information sharing purposes only and does not constitute formal legal advice. Accessing or reading this information does not create an attorney-client relationship between the reader and Dagrand Law Office. While we strive to ensure the accuracy of the information, laws and regulations are subject to change. Readers should not act upon this information without seeking professional legal counsel specific to their situation. Dagrand Law Office assumes no liability for any actions taken or not taken based on the contents of this article.",
+    
+    // New Translations for "Why Partner With Us"
+    whyPartnerTitle: "Why Partner With Dagrand?",
+    whyPartnerDesc: "In a crowded legal market, we stand out by offering a unique blend of boutique attention and big-firm capability.",
+    benefit1Title: "Partner-Led Service",
+    benefit1Desc: "Direct access to senior partners who manage your case personally, ensuring the highest level of attention.",
+    benefit2Title: "Seamless Communication",
+    benefit2Desc: "We don't just speak 4 languages; we negotiate and draft complex legal documents in them fluently.",
+    benefit3Title: "Regulatory Insight",
+    benefit3Desc: "Deep-rooted connections with local ministries allowing us to navigate bureaucracy efficiently.",
+    benefit4Title: "Commercial Pragmatism",
+    benefit4Desc: "We provide solutions that make business sense, moving beyond theoretical legal advice."
   },
   cn: {
     home: "首页",
@@ -220,6 +232,18 @@ export const TRANSLATIONS = {
     adjustFilters: "请尝试调整搜索或筛选条件。",
     clearFilters: "清除筛选",
     disclaimerTitle: "法律免责声明",
-    disclaimerText: "本文提供的信息仅供一般知识和信息分享之用，不构成正式的法律建议。访问或阅读此信息不建立读者与达观律师事务所之间的律师-客户关系。虽然我们努力确保信息的准确性，但法律法规可能会发生变化。读者在未针对具体情况寻求专业法律顾问的情况下，不应根据此信息采取行动。达观律师事务所对基于本文内容采取或不采取的任何行动不承担任何责任。"
+    disclaimerText: "本文提供的信息仅供一般知识和信息分享之用，不构成正式的法律建议。访问或阅读此信息不建立读者与达观律师事务所之间的律师-客户关系。虽然我们努力确保信息的准确性，但法律法规可能会发生变化。读者在未针对具体情况寻求专业法律顾问的情况下，不应根据此信息采取行动。达观律师事务所对基于本文内容采取或不采取的任何行动不承担任何责任。",
+    
+    // New Translations for "Why Partner With Us"
+    whyPartnerTitle: "为何选择达观？",
+    whyPartnerDesc: "在拥挤的法律市场中，我们凭借精品律所的专注度与大律所的专业能力脱颖而出。",
+    benefit1Title: "合伙人亲自负责",
+    benefit1Desc: "您可以直接与高级合伙人对接，他们将亲自管理您的案件，确保最高级别的关注。",
+    benefit2Title: "无缝沟通",
+    benefit2Desc: "我们不仅会说四种语言，更能流利地运用这些语言进行谈判和起草复杂的法律文件。",
+    benefit3Title: "监管洞察",
+    benefit3Desc: "与当地政府部门建立的深厚联系，使我们能够高效地应对行政审批流程。",
+    benefit4Title: "商业实用性",
+    benefit4Desc: "我们提供具有商业意义的解决方案，而不仅仅是理论上的法律建议。"
   }
 };
