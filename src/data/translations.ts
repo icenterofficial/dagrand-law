@@ -107,7 +107,9 @@ export const TRANSLATIONS = {
     readArticle: "Read Article",
     noUpdatesFound: "No Updates Found",
     adjustFilters: "Try adjusting your search or filters.",
-    clearFilters: "Clear Filters"
+    clearFilters: "Clear Filters",
+    disclaimerTitle: "Legal Disclaimer",
+    disclaimerText: "The information provided in this article is for general knowledge and information sharing purposes only and does not constitute formal legal advice. Accessing or reading this information does not create an attorney-client relationship between the reader and Dagrand Law Office. While we strive to ensure the accuracy of the information, laws and regulations are subject to change. Readers should not act upon this information without seeking professional legal counsel specific to their situation. Dagrand Law Office assumes no liability for any actions taken or not taken based on the contents of this article."
   },
   cn: {
     home: "首页",
@@ -216,6 +218,8 @@ export const TRANSLATIONS = {
     readArticle: "阅读文章",
     noUpdatesFound: "未找到相关动态",
     adjustFilters: "请尝试调整搜索或筛选条件。",
-    clearFilters: "清除筛选"
+    clearFilters: "清除筛选",
+    disclaimerTitle: "法律免责声明",
+    disclaimerText: "本文提供的信息仅供一般知识和信息分享之用，不构成正式的法律建议。访问或阅读此信息不建立读者与达观律师事务所之间的律师-客户关系。虽然我们努力确保信息的准确性，但法律法规可能会发生变化。读者在未针对具体情况寻求专业法律顾问的情况下，不应根据此信息采取行动。达观律师事务所对基于本文内容采取或不采取的任何行动不承担任何责任。"
   }
 };
