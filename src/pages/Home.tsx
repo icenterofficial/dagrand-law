@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Scale, ArrowRight, CheckCircle2, Globe, ChevronDown, Calendar, ArrowUpRight, Users, Building2, Gavel, Target, Lightbulb, Shield, Quote } from 'lucide-react';
+import { Scale, ArrowRight, CheckCircle2, Globe, ChevronDown, Calendar, ArrowUpRight, Users, Building2, Gavel, Target, Lightbulb, Shield, Quote, Star, Briefcase, Zap, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { ABOUT_TEXT, ABOUT_TEXT_CN, TESTIMONIALS, HOME_APPROACH } from '../constants';
 import { Section } from '../components/Section';
@@ -371,7 +372,7 @@ const Home = () => {
         </div>
     </section>
 
-    {/* SECTION 3: Our Approach (New) */}
+    {/* SECTION 3: Our Approach */}
     <section className="py-24 bg-white dark:bg-brand-dark relative transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <Section className="text-center mb-20">
@@ -419,54 +420,79 @@ const Home = () => {
         </div>
     </section>
     
-    {/* NEW SECTION: Testimonials (Social Proof) */}
-    <section className="py-24 bg-brand-navy relative overflow-hidden">
-        {/* Abstract Background */}
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 skew-x-12 transform origin-top-right"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-gold opacity-10 rounded-full blur-[80px]"></div>
+    {/* NEW SECTION: Why Choose Us (Replacing Testimonials) */}
+    <section className="py-24 bg-brand-navy relative overflow-hidden transition-colors duration-300">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-b from-brand-navy/0 to-black/20 pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <Section>
-                <div className="text-center mb-16">
-                    <Quote className="h-10 w-10 text-brand-gold mx-auto mb-6 opacity-80" />
-                    <h2 className="text-3xl md:text-5xl font-serif font-bold text-white mb-6">{t('trustedByLeaders')}</h2>
-                    <p className="text-gray-300 text-lg max-w-2xl mx-auto font-light">
-                        {t('trustedDesc')}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+                {/* Left Side: Title & Description */}
+                <Section>
+                    <div className="flex items-center gap-3 mb-6">
+                        <span className="h-[2px] w-12 bg-brand-gold"></span>
+                        <span className="text-brand-gold font-bold tracking-[0.25em] uppercase text-xs">{t('boutiqueFirm')}</span>
+                    </div>
+                    <h2 className="text-3xl md:text-5xl font-serif font-bold text-white mb-8 leading-tight">
+                        {t('whyPartnerTitle')}
+                    </h2>
+                    <p className="text-gray-300 text-lg leading-relaxed font-light mb-10 text-justify">
+                        {t('whyPartnerDesc')}
                     </p>
-                </div>
+                    <Link to="/contact" className="inline-block bg-brand-gold text-white px-8 py-4 rounded-sm font-bold uppercase tracking-widest text-sm hover:bg-white hover:text-brand-navy shadow-lg transition-all duration-300">
+                        {t('startConsultation')}
+                    </Link>
+                </Section>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {TESTIMONIALS.map((testimonial, idx) => {
-                        const quote = getContent(testimonial.quote, testimonial.quote_cn);
-                        const author = getContent(testimonial.author, testimonial.author_cn);
-                        const company = getContent(testimonial.company, testimonial.company_cn);
-
-                        return (
-                        <div key={idx} className="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-sm hover:bg-white/10 transition-colors duration-300 relative">
-                            {/* Decorative Quote Mark */}
-                            <div className="absolute top-4 right-4 text-6xl font-serif text-brand-gold/10 leading-none">”</div>
-                            
-                            <p className="text-gray-300 italic mb-8 leading-relaxed font-light relative z-10 text-justify">
-                                "{quote}"
-                            </p>
-                            <div className="flex items-center gap-4">
-                                <div className="h-10 w-10 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold font-bold font-serif">
-                                    {author.charAt(0)}
-                                </div>
-                                <div>
-                                    <div className="text-white font-bold text-sm uppercase tracking-wider">{author}</div>
-                                    <div className="text-brand-gold text-xs">{company}</div>
-                                </div>
+                {/* Right Side: Benefits Grid */}
+                <MotionDiv 
+                    variants={staggerContainer}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                >
+                    {[
+                        { 
+                            icon: Star, 
+                            title: t('benefit1Title'), 
+                            desc: t('benefit1Desc') 
+                        },
+                        { 
+                            icon: MessageCircle, 
+                            title: t('benefit2Title'), 
+                            desc: t('benefit2Desc') 
+                        },
+                        { 
+                            icon: Briefcase, 
+                            title: t('benefit3Title'), 
+                            desc: t('benefit3Desc') 
+                        },
+                        { 
+                            icon: Zap, 
+                            title: t('benefit4Title'), 
+                            desc: t('benefit4Desc') 
+                        }
+                    ].map((item, idx) => (
+                        <MotionDiv key={idx} variants={fadeInUp} className="bg-white/5 backdrop-blur-sm p-6 rounded-sm border border-white/10 hover:bg-white/10 hover:border-brand-gold/50 transition-all duration-300 group">
+                            <div className="mb-4 bg-white/10 w-fit p-3 rounded-full group-hover:bg-brand-gold group-hover:text-white transition-colors text-brand-gold">
+                                <item.icon className="h-6 w-6" />
                             </div>
-                        </div>
-                    )})}
-                </div>
-            </Section>
+                            <h4 className="font-serif font-bold text-lg text-white mb-2">
+                                {item.title}
+                            </h4>
+                            <p className="text-sm text-gray-400 font-light leading-relaxed group-hover:text-gray-300">
+                                {item.desc}
+                            </p>
+                        </MotionDiv>
+                    ))}
+                </MotionDiv>
+            </div>
         </div>
     </section>
 
-    {/* SECTION 4: Latest Insights */}
-    <section className="py-24 bg-brand-gray dark:bg-[#0b1d33] relative transition-colors duration-300">
+    {/* SECTION 5: Latest Insights */}
+    <section className="py-24 bg-white dark:bg-brand-dark relative transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
                 <Section>
@@ -494,7 +520,7 @@ const Home = () => {
 
                     return (
                     <MotionDiv key={update.id} variants={fadeInUp}>
-                        <Link to={`/updates/${update.id}`} className="group bg-white dark:bg-brand-navy dark:border dark:border-white/10 rounded-sm overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col h-full hover:-translate-y-2 cursor-pointer">
+                        <Link to={`/updates/${update.id}`} className="group bg-white dark:bg-brand-navy dark:border dark:border-white/10 rounded-sm overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col h-full hover:-translate-y-2 cursor-pointer border border-gray-100 dark:border-white/10">
                             <div className="relative h-60 overflow-hidden">
                                 <ImageWithSkeleton 
                                     src={update.image} 
@@ -507,15 +533,15 @@ const Home = () => {
                                     <Calendar className="h-3 w-3 text-brand-gold" /> {update.date}
                                 </div>
                             </div>
-                            <div className="p-8 flex flex-col flex-grow relative">
+                            <div className="p-8 flex flex-col flex-grow relative bg-gray-50 dark:bg-[#0f1d30]">
                                 <h3 className="text-xl font-serif font-bold text-brand-navy dark:text-white mb-4 group-hover:text-brand-gold transition-colors line-clamp-2">
                                     {title}
                                 </h3>
-                                <p className="text-gray-600 dark:text-gray-300 text-sm mb-6 line-clamp-3 leading-relaxed flex-grow">
+                                <p className="text-gray-600 dark:text-gray-300 text-sm mb-6 line-clamp-3 leading-relaxed flex-grow font-light">
                                     {summary}
                                 </p>
                                 
-                                <div className="pt-6 border-t border-gray-100 dark:border-white/10 flex items-center justify-between mt-auto">
+                                <div className="pt-6 border-t border-gray-200 dark:border-white/10 flex items-center justify-between mt-auto">
                                     {update.author ? (
                                         <div className="flex items-center gap-2">
                                             <img src={update.author.avatar} alt={update.author.name} className="w-8 h-8 rounded-full border border-gray-200" />
@@ -526,7 +552,7 @@ const Home = () => {
                                     ) : (
                                         <span className="text-xs font-bold text-brand-navy dark:text-gray-200 uppercase tracking-widest">{t('readMore')}</span>
                                     )}
-                                    <div className="p-2 rounded-full bg-brand-gray dark:bg-white/10 group-hover:bg-brand-gold group-hover:text-white transition-colors">
+                                    <div className="p-2 rounded-full bg-white dark:bg-white/10 group-hover:bg-brand-gold group-hover:text-white transition-colors border border-gray-200 dark:border-transparent">
                                         <ArrowUpRight className="h-4 w-4 dark:text-white" />
                                     </div>
                                 </div>
