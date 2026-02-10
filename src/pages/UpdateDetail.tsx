@@ -1,12 +1,14 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, Share2, Clock, Check, Facebook, Linkedin, Link as LinkIcon, X, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Share2, Clock, Check, Facebook, Linkedin, Link as LinkIcon, X, User, AlertTriangle } from 'lucide-react';
 import { Section } from '../components/Section';
 import { SEO } from '../components/SEO';
 import { useLegalUpdates } from '../hooks/useLegalUpdates';
 import { Skeleton } from '../components/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const MotionDiv = motion.div as any;
 
@@ -34,6 +36,7 @@ const UpdateDetail = () => {
   const { updates, loading } = useLegalUpdates();
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { t } = useLanguage();
   
   const update = updates.find((u) => u.id === id);
 
@@ -292,6 +295,19 @@ const UpdateDetail = () => {
                                        </MotionDiv>
                                    )}
                                </AnimatePresence>
+                           </div>
+                       </div>
+
+                       {/* Disclaimer Section */}
+                       <div className="mt-12 p-6 bg-gray-50 dark:bg-white/5 border-l-4 border-gray-300 dark:border-gray-600 rounded-r-sm">
+                           <div className="flex items-start gap-3">
+                               <AlertTriangle className="h-5 w-5 text-gray-400 shrink-0 mt-0.5" />
+                               <div>
+                                   <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">{t('disclaimerTitle')}</h4>
+                                   <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-justify font-light">
+                                       {t('disclaimerText')}
+                                   </p>
+                               </div>
                            </div>
                        </div>
                    </Section>
