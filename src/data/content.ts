@@ -84,7 +84,7 @@ export const CONTACT_INFO = {
   businessHours: "Mondays – Fridays, 9am – 5pm",
   businessHours_cn: "周一至周五，上午9点至下午5点",
   phones: [
-    { label: "Khmer, English and French", number: "+855 (0)98 539 910" },
+    { label: "Khmer, English, French", number: "+855 (0)98 539 910" },
     { label: "Chinese", number: "+855 (0)96 866 8508" }
   ],
   email: "info@dagrand.net",
