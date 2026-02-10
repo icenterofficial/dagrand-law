@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -109,7 +110,7 @@ const Contact = () => {
                             <h3 className="font-bold text-white mb-1">{t('phone')}</h3>
                             <div className="space-y-1">
                                 {CONTACT_INFO.phones.map((p, i) => (
-                                    <p key={i} className="text-gray-400 text-sm">{p.number} <span className="text-xs text-brand-gold/70 ml-2">({p.label.split(',')[0]})</span></p>
+                                    <p key={i} className="text-gray-400 text-sm">{p.number} <span className="text-xs text-brand-gold/70 ml-2">({p.label})</span></p>
                                 ))}
                             </div>
                         </div>
