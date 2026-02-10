@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ChevronRight, ChevronLeft, List, X, Grid, Scale } from 'lucide-react';
@@ -177,41 +178,43 @@ const PracticeDetail = () => {
             </div>
 
             {/* SIDEBAR (Right - Spans 4 cols) */}
-            <div className="lg:col-span-4 mt-12 lg:mt-0 space-y-8">
-                {/* Topics Widget */}
-                <div className="bg-brand-gray dark:bg-white/5 border border-gray-100 dark:border-white/10 p-6 rounded-sm sticky top-24">
-                    <h3 className="font-serif font-bold text-lg text-brand-navy dark:text-white mb-4 flex items-center gap-2">
-                        <List className="h-5 w-5 text-brand-gold" />
-                        {t('topics')}
-                    </h3>
-                    <ul className="space-y-2">
-                        {PRACTICE_AREAS.map((area) => (
-                            <li key={area.id}>
-                                <Link 
-                                    to={`/practice-areas/${area.id}`}
-                                    className={`block px-3 py-2 rounded text-sm transition-colors ${
-                                        area.id === activeArea.id 
-                                        ? 'bg-brand-navy text-white font-bold shadow-md' 
-                                        : 'text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 hover:text-brand-navy dark:hover:text-white'
-                                    }`}
-                                >
-                                    {getContent(area.title, area.title_cn)}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+            <div className="lg:col-span-4 mt-12 lg:mt-0">
+                <div className="sticky top-28 space-y-8">
+                    {/* Topics Widget */}
+                    <div className="bg-brand-gray dark:bg-white/5 border border-gray-100 dark:border-white/10 p-6 rounded-sm">
+                        <h3 className="font-serif font-bold text-lg text-brand-navy dark:text-white mb-4 flex items-center gap-2">
+                            <List className="h-5 w-5 text-brand-gold" />
+                            {t('topics')}
+                        </h3>
+                        <ul className="space-y-2">
+                            {PRACTICE_AREAS.map((area) => (
+                                <li key={area.id}>
+                                    <Link 
+                                        to={`/practice-areas/${area.id}`}
+                                        className={`block px-3 py-2 rounded text-sm transition-colors ${
+                                            area.id === activeArea.id 
+                                            ? 'bg-brand-navy text-white font-bold shadow-md' 
+                                            : 'text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 hover:text-brand-navy dark:hover:text-white'
+                                        }`}
+                                    >
+                                        {getContent(area.title, area.title_cn)}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
 
-                {/* Contact CTA */}
-                <div className="bg-brand-navy text-white p-8 rounded-sm relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-gold opacity-10 rounded-full blur-2xl translate-x-1/2 -translate-y-1/2"></div>
-                    <h3 className="font-serif font-bold text-xl mb-3 relative z-10">{t('needAssistance')}</h3>
-                    <p className="text-sm text-gray-300 mb-6 font-light relative z-10">
-                        {t('readyToProvide')}
-                    </p>
-                    <Link to="/contact" className="block w-full text-center bg-brand-gold text-white font-bold text-xs uppercase tracking-widest py-3 hover:bg-white hover:text-brand-navy transition-colors relative z-10 rounded-sm">
-                        {t('getInTouch')}
-                    </Link>
+                    {/* Contact CTA */}
+                    <div className="bg-brand-navy text-white p-8 rounded-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-gold opacity-10 rounded-full blur-2xl translate-x-1/2 -translate-y-1/2"></div>
+                        <h3 className="font-serif font-bold text-xl mb-3 relative z-10">{t('needAssistance')}</h3>
+                        <p className="text-sm text-gray-300 mb-6 font-light relative z-10">
+                            {t('readyToProvide')}
+                        </p>
+                        <Link to="/contact" className="block w-full text-center bg-brand-gold text-white font-bold text-xs uppercase tracking-widest py-3 hover:bg-white hover:text-brand-navy transition-colors relative z-10 rounded-sm">
+                            {t('getInTouch')}
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
