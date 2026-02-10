@@ -1,6 +1,11 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Scale, ArrowRight, Search, X } from 'lucide-react';
+import { 
+  Scale, ArrowRight, Search, X, 
+  Users, Building2, Landmark, Globe, TrendingUp, 
+  Lightbulb, Gavel, Zap, Home, Hammer, HeartPulse 
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PRACTICE_AREAS } from '../constants';
 import { PageHeader } from '../components/PageHeader';
@@ -23,6 +28,21 @@ const staggerContainer = {
 };
 
 const MotionDiv = motion.div as any;
+
+// Mapping IDs to Lucide Icons
+const iconMap: Record<string, any> = {
+  'employment': Users,
+  'corporate': Building2,
+  'tax': Landmark,
+  'trade': Globe,
+  'capital-market': TrendingUp,
+  'ip': Lightbulb,
+  'dispute': Gavel,
+  'energy': Zap,
+  'real-estate': Home,
+  'construction': Hammer,
+  'healthcare': HeartPulse
+};
 
 const PracticeList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -92,6 +112,7 @@ const PracticeList = () => {
                 {filteredAreas.map((area) => {
                     const title = getContent(area.title, area.title_cn);
                     const desc = getContent(area.shortDescription, area.shortDescription_cn);
+                    const IconComponent = iconMap[area.id] || Scale; // Get dynamic icon
 
                     return (
                     <MotionDiv 
@@ -123,7 +144,7 @@ const PracticeList = () => {
                             
                             <div className="mb-auto relative z-10">
                                 <div className="mb-6 inline-flex p-3 rounded-full bg-brand-gray dark:bg-white/10 group-hover:bg-white/10 dark:group-hover:bg-brand-navy transition-colors duration-300 backdrop-blur-sm">
-                                    <Scale className="h-8 w-8 text-brand-navy dark:text-white group-hover:text-white dark:group-hover:text-brand-gold transition-colors duration-300" />
+                                    <IconComponent className="h-8 w-8 text-brand-navy dark:text-white group-hover:text-white dark:group-hover:text-brand-gold transition-colors duration-300" />
                                 </div>
                                 <h3 className="font-serif font-bold text-xl mb-4 leading-tight text-brand-navy dark:text-white group-hover:text-white transition-colors duration-300">
                                     {title}
