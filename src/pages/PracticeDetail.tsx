@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ChevronRight, ChevronLeft, List, X, Grid, Scale } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,6 +28,18 @@ const PracticeDetail = () => {
     window.scrollTo(0, 0);
     setMobileMenuOpen(false);
   }, [id]);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   // If area not found, redirect to practice list or show error
   if (!activeArea) {
@@ -115,13 +128,29 @@ const PracticeDetail = () => {
         backgroundImage={activeArea.image}
       />
 
+      {/* NEW: Mobile Sticky Sub-Header */}
+      {/* Increased z-index to 40 to sit above the menu dropdown */}
+      <div className="lg:hidden sticky top-[72px] z-40 bg-white/95 dark:bg-brand-dark/95 backdrop-blur-md border-b border-gray-100 dark:border-white/10 px-4 py-3 mb-6 flex items-center justify-between shadow-sm transition-all duration-300">
+          <Link to="/practice-areas" className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-brand-navy dark:hover:text-white transition-colors">
+              <ArrowLeft className="h-4 w-4" /> {t('backToOverview')}
+          </Link>
+          <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors border ${mobileMenuOpen ? 'bg-brand-gold text-white border-brand-gold' : 'bg-brand-gray dark:bg-white/10 text-brand-navy dark:text-white border-gray-200 dark:border-white/5 hover:bg-brand-gold hover:text-white'}`}
+          >
+              {mobileMenuOpen ? <X className="h-3.5 w-3.5" /> : <List className="h-3.5 w-3.5" />}
+              {t('topics')}
+          </button>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-20 relative">
         <div className="lg:grid lg:grid-cols-12 lg:gap-16">
             
             {/* MAIN CONTENT COLUMN (Left - Spans 8 cols) */}
             <div className="lg:col-span-8">
                 {/* Desktop Sticky Breadcrumbs & Navigation */}
-                <div className="hidden lg:flex sticky top-[56px] z-30 bg-white/95 dark:bg-brand-dark/95 backdrop-blur-md border-b border-gray-100 dark:border-white/10 mb-6 -mt-8 pt-8 pb-4 items-center justify-between shadow-sm lg:shadow-none">
+                {/* Updated top offset to avoid Navbar overlap */}
+                <div className="hidden lg:flex sticky top-20 z-30 bg-white/95 dark:bg-brand-dark/95 backdrop-blur-md border-b border-gray-100 dark:border-white/10 mb-6 -mt-8 pt-8 pb-4 items-center justify-between shadow-sm lg:shadow-none">
                   <Breadcrumbs 
                     items={[
                       { label: t('practice'), path: "/practice-areas" },
@@ -164,12 +193,7 @@ const PracticeDetail = () => {
                   </div>
                 </div>
 
-                {/* Mobile Breadcrumbs (Simple) */}
-                <div className="lg:hidden mb-6">
-                    <Link to="/practice-areas" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-brand-navy dark:hover:text-white transition-colors">
-                        <ArrowLeft className="h-4 w-4" /> {t('backToOverview')}
-                    </Link>
-                </div>
+                {/* Removed static mobile breadcrumbs here - now in sticky header */}
 
                 {/* Content Body */}
                 <div className="prose prose-lg dark:prose-invert max-w-none">
@@ -179,6 +203,7 @@ const PracticeDetail = () => {
 
             {/* SIDEBAR (Right - Spans 4 cols) */}
             <div className="lg:col-span-4 mt-12 lg:mt-0">
+                {/* Updated top offset for Sidebar as well */}
                 <div className="sticky top-28 space-y-8">
                     {/* Topics Widget */}
                     <div className="bg-brand-gray dark:bg-white/5 border border-gray-100 dark:border-white/10 p-6 rounded-sm">
@@ -220,60 +245,62 @@ const PracticeDetail = () => {
         </div>
       </div>
 
-      {/* Floating Mobile Menu for Practice Areas */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-            <>
-                <MotionDiv 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
-                />
-                <MotionDiv 
-                    initial={{ y: "100%" }}
-                    animate={{ y: 0 }}
-                    exit={{ y: "100%" }}
-                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                    className="fixed bottom-0 left-0 right-0 bg-white dark:bg-brand-dark z-50 rounded-t-2xl p-6 lg:hidden max-h-[70vh] overflow-y-auto"
-                >
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-serif font-bold text-xl text-brand-navy dark:text-white">{t('topics')}</h3>
-                        <button onClick={() => setMobileMenuOpen(false)} className="p-2 bg-gray-100 dark:bg-white/10 rounded-full">
-                            <X className="h-5 w-5 text-gray-500 dark:text-gray-300" />
-                        </button>
-                    </div>
-                    <ul className="space-y-3">
-                        {PRACTICE_AREAS.map((area) => (
-                            <li key={area.id}>
-                                <Link 
-                                    to={`/practice-areas/${area.id}`}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all ${
-                                        area.id === activeArea.id 
-                                        ? 'bg-brand-navy text-white font-bold shadow-md' 
-                                        : 'bg-gray-50 dark:bg-white/5 text-gray-700 dark:text-gray-300'
-                                    }`}
-                                >
-                                    <span className={`w-2 h-2 rounded-full ${area.id === activeArea.id ? 'bg-brand-gold' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-                                    {getContent(area.title, area.title_cn)}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </MotionDiv>
-            </>
-        )}
-      </AnimatePresence>
-
-      {/* Mobile Fab for Menu */}
-      <button 
-        onClick={() => setMobileMenuOpen(true)}
-        className="fixed bottom-6 left-6 lg:hidden bg-brand-navy text-white p-4 rounded-full shadow-2xl z-30 flex items-center justify-center border border-white/20"
-      >
-          <List className="h-6 w-6" />
-      </button>
+      {/* Floating Mobile Menu for Practice Areas (Sidebar Style - Portal to Body) */}
+      {createPortal(
+        <AnimatePresence>
+            {mobileMenuOpen && (
+                <>
+                    <MotionDiv 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="fixed inset-0 bg-black/60 z-[1000] lg:hidden backdrop-blur-sm"
+                    />
+                    <MotionDiv 
+                        initial={{ x: "100%" }}
+                        animate={{ x: 0 }}
+                        exit={{ x: "100%" }}
+                        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                        className="fixed inset-y-0 right-0 w-[85%] max-w-sm bg-white dark:bg-brand-dark z-[1001] shadow-2xl border-l border-gray-100 dark:border-white/5 overflow-y-auto"
+                    >
+                        <div className="sticky top-0 bg-white/95 dark:bg-brand-dark/95 backdrop-blur-md border-b border-gray-100 dark:border-white/10 p-5 flex justify-between items-center z-10">
+                            <h3 className="font-serif font-bold text-xl text-brand-navy dark:text-white flex items-center gap-2">
+                                <List className="h-5 w-5 text-brand-gold" />
+                                {t('topics')}
+                            </h3>
+                            <button 
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="p-2 bg-gray-100 dark:bg-white/10 rounded-full text-gray-500 dark:text-gray-300 hover:bg-brand-gold hover:text-white transition-all"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        <div className="p-4 space-y-2">
+                            {PRACTICE_AREAS.map((area) => (
+                                <div key={area.id}>
+                                    <Link 
+                                        to={`/practice-areas/${area.id}`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm transition-all ${
+                                            area.id === activeArea.id 
+                                            ? 'bg-brand-navy text-white font-bold shadow-md' 
+                                            : 'bg-gray-50 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'
+                                        }`}
+                                    >
+                                        <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${area.id === activeArea.id ? 'bg-brand-gold' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
+                                        <span className="leading-snug">{getContent(area.title, area.title_cn)}</span>
+                                    </Link>
+                                </div>
+                            ))}
+                        </div>
+                    </MotionDiv>
+                </>
+            )}
+        </AnimatePresence>,
+        document.body
+      )}
 
     </div>
   );
