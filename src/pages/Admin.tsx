@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth, User } from '../contexts/AuthContext';
-import { Scale, Lock, ArrowRight, LogOut, Users, FileText, Plus, Check, X, Trash2, CloudOff, Database, Loader2, ChevronDown, Edit, Image as ImageIcon, Calendar, Save, Menu, Eye, EyeOff, Globe, Upload, UserCog, Camera } from 'lucide-react';
+import { Scale, Lock, ArrowRight, LogOut, Users, FileText, Plus, Check, X, Trash2, CloudOff, Database, Loader2, ChevronDown, Edit, Image as ImageIcon, Calendar, Save, Menu, Eye, EyeOff, Globe, Upload, UserCog, Camera, Bold, Italic, Underline, List, ListOrdered } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -553,7 +554,10 @@ const Admin = () => {
       const finalImage = formData.image || 'https://picsum.photos/600/400';
       
       // SECURITY: Sanitize content before payload construction
-      const sanitizedContent = (formData.content || []).map(p => DOMPurify.sanitize(p));
+      // Note: We're allowing some HTML tags now (b, i, u, ul, li) so we should be careful with sanitization policy
+      // but DOMPurify on display side (UpdateDetail) is the main line of defense.
+      // Here we just sanitize mostly to prevent script injection into DB.
+      const sanitizedContent = (formData.content || []).map(p => DOMPurify.sanitize(p, { ALLOWED_TAGS: ['b', 'i', 'u', 'ul', 'ol', 'li', 'br', 'strong', 'em'] }));
       const sanitizedTitle = DOMPurify.sanitize(formData.title || '');
       const sanitizedSummary = DOMPurify.sanitize(formData.summary || '');
 
@@ -751,6 +755,36 @@ const Admin = () => {
       const newContent = [...(formData.content || [])];
       newContent.splice(index, 1);
       setFormData({ ...formData, content: newContent });
+  };
+
+  // --- RICH TEXT HELPERS ---
+  const insertTag = (index: number, tag: string) => {
+      const textarea = document.getElementById(`content-${index}`) as HTMLTextAreaElement;
+      if (!textarea) return;
+
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const text = textarea.value;
+      const selectedText = text.substring(start, end);
+      
+      let replacement = '';
+      
+      // Determine format
+      switch(tag) {
+          case 'bold': replacement = `<b>${selectedText}</b>`; break;
+          case 'italic': replacement = `<i>${selectedText}</i>`; break;
+          case 'underline': replacement = `<u>${selectedText}</u>`; break;
+          case 'ul': replacement = `\n<ul>\n  <li>${selectedText || 'Item'}</li>\n</ul>\n`; break;
+          case 'ol': replacement = `\n<ol>\n  <li>${selectedText || 'Item'}</li>\n</ol>\n`; break;
+          default: replacement = selectedText;
+      }
+
+      // Insert back into state
+      const newText = text.substring(0, start) + replacement + text.substring(end);
+      handleContentChange(index, newText);
+
+      // Restore focus (optional, usually good UX)
+      setTimeout(() => textarea.focus(), 0);
   };
 
   if (authLoading) return <div className="min-h-screen bg-brand-navy flex items-center justify-center"><Loader2 className="animate-spin text-brand-gold h-10 w-10" /></div>;
@@ -1170,7 +1204,9 @@ const Admin = () => {
                     <div className="max-w-4xl mx-auto px-6 py-16">
                          <div className="prose prose-lg prose-headings:font-serif prose-headings:text-brand-navy prose-p:text-gray-600 prose-p:font-light prose-p:leading-loose max-w-none first-letter:text-5xl first-letter:font-serif first-letter:text-brand-gold first-letter:mr-3 first-letter:float-left">
                            <p className="lead font-medium text-xl text-brand-navy italic mb-8 border-l-4 border-brand-gold pl-4">{previewArticle.summary}</p>
-                           {previewArticle.content.map((paragraph, idx) => (<p key={idx}>{paragraph}</p>))}
+                           {previewArticle.content.map((paragraph, idx) => (
+                               <p key={idx} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(paragraph) }}></p>
+                           ))}
                        </div>
                     </div>
                 </MotionDiv>
@@ -1197,7 +1233,34 @@ const Admin = () => {
 
                                 <div className="space-y-2"><label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Cover Image</label><div className="bg-gray-50 border border-gray-200 rounded-lg p-4">{formData.image && (<div className="mb-4 relative h-40 w-full rounded-md overflow-hidden border border-gray-200"><img src={formData.image} alt="Preview" className="w-full h-full object-cover" /><button type="button" onClick={() => setFormData({...formData, image: ''})} className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors shadow-sm"><X className="h-3 w-3" /></button></div>)}<div className="flex gap-4 items-start"><div className="flex-1 space-y-2"><label className="text-[10px] uppercase font-bold text-gray-400">Option 1: Paste URL</label><div className="relative"><ImageIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" /><input type="text" value={formData.image && !formData.image.startsWith('http') && !formData.image.startsWith('data') ? '' : formData.image} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded text-sm focus:border-brand-navy outline-none" placeholder="https://..." /></div></div><div className="w-[1px] bg-gray-200 self-stretch"></div><div className="flex-1 space-y-2"><label className="text-[10px] uppercase font-bold text-gray-400">Option 2: Upload File</label><label className={`flex items-center justify-center gap-2 w-full py-2 bg-white border border-dashed border-gray-300 rounded text-sm text-gray-500 hover:border-brand-gold hover:text-brand-navy cursor-pointer transition-all ${isUploadingImage ? 'opacity-50 cursor-not-allowed' : ''}`}>{isUploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}<span>{isUploadingImage ? 'Uploading...' : 'Choose File'}</span><input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isUploadingImage}/></label></div></div></div></div>
                                 <div className="space-y-1.5"><label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Summary</label><textarea rows={2} value={formData.summary} onChange={e => setFormData({...formData, summary: e.target.value})} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-brand-navy focus:bg-white outline-none" placeholder="Brief description for the card preview..." /></div>
-                                <div className="space-y-3"><div className="flex items-center justify-between"><label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Content Paragraphs</label><button type="button" onClick={addParagraph} className="text-xs text-brand-navy font-bold hover:text-brand-gold flex items-center gap-1">+ Add Paragraph</button></div>{formData.content?.map((para, idx) => (<div key={idx} className="flex gap-2"><textarea rows={3} value={para} onChange={e => handleContentChange(idx, e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-brand-navy focus:bg-white outline-none" placeholder={`Paragraph ${idx + 1}...`} />{formData.content!.length > 1 && (<button type="button" onClick={() => removeParagraph(idx)} className="text-gray-400 hover:text-red-500 self-start mt-2"><Trash2 className="h-4 w-4" /></button>)}</div>))}</div>
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between"><label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Content Paragraphs</label><button type="button" onClick={addParagraph} className="text-xs text-brand-navy font-bold hover:text-brand-gold flex items-center gap-1">+ Add Paragraph</button></div>
+                                    {formData.content?.map((para, idx) => (
+                                        <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-brand-gold/20 focus-within:border-brand-gold/50 transition-all">
+                                            {/* RICH TEXT TOOLBAR */}
+                                            <div className="flex items-center gap-1 p-2 border-b border-gray-200 bg-gray-100/50">
+                                                <button type="button" onClick={() => insertTag(idx, 'bold')} title="Bold" className="p-1.5 hover:bg-gray-200 rounded text-gray-600 hover:text-black transition-colors"><Bold className="h-3.5 w-3.5" /></button>
+                                                <button type="button" onClick={() => insertTag(idx, 'italic')} title="Italic" className="p-1.5 hover:bg-gray-200 rounded text-gray-600 hover:text-black transition-colors"><Italic className="h-3.5 w-3.5" /></button>
+                                                <button type="button" onClick={() => insertTag(idx, 'underline')} title="Underline" className="p-1.5 hover:bg-gray-200 rounded text-gray-600 hover:text-black transition-colors"><Underline className="h-3.5 w-3.5" /></button>
+                                                <div className="w-[1px] h-4 bg-gray-300 mx-1"></div>
+                                                <button type="button" onClick={() => insertTag(idx, 'ul')} title="Bullet List" className="p-1.5 hover:bg-gray-200 rounded text-gray-600 hover:text-black transition-colors"><List className="h-3.5 w-3.5" /></button>
+                                                <button type="button" onClick={() => insertTag(idx, 'ol')} title="Numbered List" className="p-1.5 hover:bg-gray-200 rounded text-gray-600 hover:text-black transition-colors"><ListOrdered className="h-3.5 w-3.5" /></button>
+                                                
+                                                {formData.content!.length > 1 && (
+                                                    <button type="button" onClick={() => removeParagraph(idx)} className="ml-auto text-gray-400 hover:text-red-500 p-1.5 hover:bg-red-50 rounded transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+                                                )}
+                                            </div>
+                                            <textarea 
+                                                id={`content-${idx}`}
+                                                rows={4} 
+                                                value={para} 
+                                                onChange={e => handleContentChange(idx, e.target.value)} 
+                                                className="w-full px-4 py-3 bg-transparent border-none outline-none text-sm resize-y" 
+                                                placeholder={`Paragraph ${idx + 1} content...`} 
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
                             </form>
                         </div>
                         <div className="p-6 border-t border-gray-100 bg-gray-50 shrink-0 flex justify-end gap-3">
