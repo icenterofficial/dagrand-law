@@ -1,7 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuth, User } from '../contexts/AuthContext';
-import { Scale, Lock, ArrowRight, LogOut, Users, FileText, Plus, Check, X, Trash2, CloudOff, Database, Loader2, ChevronDown, Edit, Image as ImageIcon, Calendar, Save, Menu, Eye, EyeOff, Globe, Upload, UserCog, Camera, Bold, Italic, Underline, List, ListOrdered } from 'lucide-react';
+import { Scale, Lock, ArrowRight, LogOut, Users, FileText, Plus, Check, X, Trash2, CloudOff, Database, Loader2, ChevronDown, Edit, Image as ImageIcon, Calendar, Save, Menu, Eye, EyeOff, Globe, Upload, UserCog, Camera, Bold, Italic, Underline, List, ListOrdered, Undo, Redo } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -26,9 +26,8 @@ const ArticleSchema = z.object({
   summary: z.string().min(10, "Summary is too short").max(500, "Summary is too long"),
   date: z.string().min(1, "Date is required"),
   category: z.string().min(1, "Category is required"),
-  // Allow data: URLs for local fallback
   image: z.string().min(5, "Image is required"), 
-  content: z.array(z.string().min(1, "Paragraph cannot be empty")),
+  content: z.array(z.string().min(1, "Content cannot be empty")),
   author: z.object({
       id: z.string(),
       name: z.string(),
@@ -36,6 +35,80 @@ const ArticleSchema = z.object({
       role: z.string()
   }).optional()
 });
+
+// --- COMPONENT: RICH TEXT EDITOR ---
+const RichTextEditor = ({ value, onChange, placeholder }: { value: string, onChange: (val: string) => void, placeholder: string }) => {
+    const editorRef = useRef<HTMLDivElement>(null);
+    const [isFocused, setIsFocused] = useState(false);
+
+    // Initial value sync
+    useEffect(() => {
+        if (editorRef.current) {
+            // Only set HTML if it's empty to prevent cursor jumping on re-renders, 
+            // or if the value coming in is drastically different (e.g. reset)
+            if (editorRef.current.innerHTML === '' && value !== '') {
+                editorRef.current.innerHTML = value;
+            } else if (value === '' && editorRef.current.innerHTML !== '') {
+                editorRef.current.innerHTML = '';
+            }
+        }
+    }, [value]);
+
+    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+        onChange(e.currentTarget.innerHTML);
+    };
+
+    const exec = (command: string, value: string = '') => {
+        document.execCommand(command, false, value);
+        if (editorRef.current) {
+            editorRef.current.focus();
+            onChange(editorRef.current.innerHTML);
+        }
+    };
+
+    const ToolbarButton = ({ onClick, icon, active = false, title }: any) => (
+        <button 
+            type="button" 
+            onClick={(e) => { e.preventDefault(); onClick(); }} 
+            title={title}
+            className={`p-2 rounded-md transition-all duration-200 ${active ? 'bg-brand-navy text-white' : 'text-gray-500 hover:bg-gray-100 hover:text-brand-navy'}`}
+        >
+            {icon}
+        </button>
+    );
+
+    return (
+        <div className={`border rounded-lg overflow-hidden bg-white transition-all duration-300 ${isFocused ? 'border-brand-navy ring-1 ring-brand-navy/20 shadow-md' : 'border-gray-200'}`}>
+            {/* Toolbar */}
+            <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-100 bg-gray-50/80 backdrop-blur-sm">
+                <ToolbarButton onClick={() => exec('bold')} icon={<Bold className="w-4 h-4"/>} title="Bold" />
+                <ToolbarButton onClick={() => exec('italic')} icon={<Italic className="w-4 h-4"/>} title="Italic" />
+                <ToolbarButton onClick={() => exec('underline')} icon={<Underline className="w-4 h-4"/>} title="Underline" />
+                <div className="w-[1px] h-5 bg-gray-300 mx-2"></div>
+                <ToolbarButton onClick={() => exec('insertUnorderedList')} icon={<List className="w-4 h-4"/>} title="Bullet List" />
+                <ToolbarButton onClick={() => exec('insertOrderedList')} icon={<ListOrdered className="w-4 h-4"/>} title="Numbered List" />
+                <div className="w-[1px] h-5 bg-gray-300 mx-2"></div>
+                <ToolbarButton onClick={() => exec('undo')} icon={<Undo className="w-4 h-4"/>} title="Undo" />
+                <ToolbarButton onClick={() => exec('redo')} icon={<Redo className="w-4 h-4"/>} title="Redo" />
+            </div>
+            
+            {/* Editor Area */}
+            <div
+                ref={editorRef}
+                className="prose prose-sm max-w-none p-5 min-h-[300px] outline-none text-gray-700 font-light leading-relaxed cursor-text"
+                contentEditable
+                onInput={handleInput}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                data-placeholder={placeholder}
+                style={{ whiteSpace: 'pre-wrap' }} 
+            />
+            <div className="px-4 py-2 bg-gray-50 text-[10px] text-gray-400 border-t border-gray-100 text-right">
+                Rich Text Editor Mode
+            </div>
+        </div>
+    );
+};
 
 const Admin = () => {
   const { isAuthenticated, login, logout, user, users: contextUsers, addUser, isLoading: authLoading, isMockMode } = useAuth();
@@ -79,13 +152,16 @@ const Admin = () => {
   const [newUserName, setNewUserName] = useState('');
   const [avatarUploadingId, setAvatarUploadingId] = useState<string | null>(null);
 
+  // Single HTML string for the editor state
+  const [editorContent, setEditorContent] = useState('');
+
   const [formData, setFormData] = useState<Partial<LegalUpdate>>({
       title: '',
       date: '',
       summary: '',
       image: '',
       category: '',
-      content: [''],
+      content: [],
       author: undefined
   });
 
@@ -93,21 +169,15 @@ const Admin = () => {
   const isAdmin = user?.role === 'admin';
 
   const canEditArticle = (article: LegalUpdate) => {
-      // Admins can edit anything
       if (isAdmin) return true;
-      // Users can edit if they are the author (compare IDs)
       if (user && article.authorId === user.id) return true;
-      // Fallback: If authorId is missing but author object exists and names match (legacy/local check)
       if (user && article.author?.name === user.name) return true;
-      
       return false;
   };
 
   const canManageTeam = () => isAdmin; 
 
-  // --- HELPER: ROBUST EDGE FUNCTION CALLER ---
   const invokeAdminAction = async (action: string, payload: any = {}) => {
-      // 1. Get Session
       let session = null;
       try {
           if (supabase) {
@@ -120,8 +190,6 @@ const Admin = () => {
 
       if (!session) throw new Error("No active session");
 
-      // 2. Try Direct Fetch (More reliable than library invoke for debugging)
-      // Use the exported SUPABASE_URL to prevent hardcoding mismatches
       const projectUrl = SUPABASE_URL; 
       const functionUrl = `${projectUrl}/functions/v1/admin-actions`;
 
@@ -144,7 +212,6 @@ const Admin = () => {
       return await response.json();
   };
 
-  // --- FETCH USERS ---
   const fetchTeamMembers = async () => {
       setLoadingTeam(true);
       
@@ -156,7 +223,6 @@ const Admin = () => {
 
       try {
           const data = await invokeAdminAction('listUsers');
-          
           const mappedUsers: User[] = data.users.map((u: any) => ({
               id: u.id,
               email: u.email || '',
@@ -164,15 +230,10 @@ const Admin = () => {
               role: u.user_metadata?.role || 'editor',
               avatar: u.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${u.user_metadata?.full_name || 'User'}&background=153c63&color=fff`
           }));
-
           setTeamMembers(mappedUsers);
       } catch (err: any) {
           console.warn("Backend fetch failed, using local fallback:", err);
           setTeamMembers(contextUsers);
-          if (activeTab === 'team') {
-             // Only show toast if user is actually on the team tab to reduce noise
-             // toast.error("Using Offline Data", { description: "Could not connect to user database." });
-          }
       } finally {
           setLoadingTeam(false);
       }
@@ -200,7 +261,6 @@ const Admin = () => {
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-
         if (data) {
             setArticles(data as LegalUpdate[]);
         }
@@ -219,11 +279,9 @@ const Admin = () => {
 
   useEffect(() => {
     let result = articles;
-
     if (categoryFilter !== '') {
         result = result.filter(a => a.category === categoryFilter);
     }
-
     if (searchQuery !== '') {
         const query = searchQuery.toLowerCase();
         result = result.filter(a => 
@@ -231,7 +289,6 @@ const Admin = () => {
             a.summary.toLowerCase().includes(query)
         );
     }
-
     setFilteredArticles(result);
   }, [articles, categoryFilter, searchQuery]);
 
@@ -247,7 +304,6 @@ const Admin = () => {
       }
   };
 
-  // --- INVITE LOGIC ---
   const handleInvite = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!canManageTeam()) {
@@ -256,8 +312,6 @@ const Admin = () => {
       }
 
       setIsInviting(true);
-
-      // 1. SECURITY: Validate Input with Zod
       const validationResult = InviteSchema.safeParse({
           email: inviteEmail,
           name: inviteName,
@@ -272,7 +326,6 @@ const Admin = () => {
           return;
       }
 
-      // Helper for Local Create
       const createLocal = () => {
           const newUser: User = {
               id: `u${Date.now()}`,
@@ -298,7 +351,7 @@ const Admin = () => {
           const data = await invokeAdminAction('createUser', {
               email: inviteEmail,
               password: invitePassword,
-              fullName: DOMPurify.sanitize(inviteName), // Sanitize before sending
+              fullName: DOMPurify.sanitize(inviteName),
               role: inviteRole
           });
 
@@ -312,7 +365,6 @@ const Admin = () => {
           resetInviteForm();
 
       } catch (err: any) {
-          console.error("Invite error:", err);
           toast.warning("Backend Failed - Created Locally", { description: err.message });
           createLocal();
       } finally {
@@ -359,7 +411,6 @@ const Admin = () => {
       if (memberId === user?.id) return;
       if (!confirm("Are you sure?")) return;
 
-    //   const previous = [...teamMembers];
       setTeamMembers(prev => prev.filter(m => m.id !== memberId));
 
       if (isMockMode || !supabase) {
@@ -383,7 +434,6 @@ const Admin = () => {
   };
 
   const saveUserName = async (memberId: string) => {
-      // Security: Basic sanitization
       const cleanName = DOMPurify.sanitize(newUserName.trim());
       if (!cleanName) return;
       
@@ -411,7 +461,6 @@ const Admin = () => {
       }
   };
 
-  // --- NEW: HANDLE USER AVATAR UPLOAD ---
   const handleUserAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>, memberId: string) => {
       const file = e.target.files?.[0];
       if (!file) return;
@@ -423,7 +472,6 @@ const Admin = () => {
 
       setAvatarUploadingId(memberId);
 
-      // MOCK MODE
       if (isMockMode || !supabase) {
           const reader = new FileReader();
           reader.onloadend = () => {
@@ -436,24 +484,20 @@ const Admin = () => {
           return;
       }
 
-      // SUPABASE MODE
       try {
           const fileExt = file.name.split('.').pop();
           const fileName = `avatar_${memberId}_${Date.now()}.${fileExt}`;
           const filePath = `${fileName}`;
 
-          // 1. Upload to 'avatars' bucket
           const { error: uploadError } = await supabase.storage
               .from('avatars')
               .upload(filePath, file);
 
           if (uploadError) throw uploadError;
 
-          // 2. Get Public URL
           const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
           const publicUrl = data.publicUrl;
 
-          // 3. Update User Metadata via Admin Action (or self update)
           const isSelf = memberId === user?.id;
           
           if (isSelf) {
@@ -465,12 +509,10 @@ const Admin = () => {
               });
           }
 
-          // 4. Update Local State
           setTeamMembers(prev => prev.map(m => m.id === memberId ? { ...m, avatar: publicUrl } : m));
           toast.success("Profile Picture Updated");
 
       } catch (error: any) {
-          console.error("Avatar upload failed:", error);
           toast.error("Upload Failed", { description: error.message || "Storage bucket 'avatars' might be missing." });
       } finally {
           setAvatarUploadingId(null);
@@ -486,13 +528,16 @@ const Admin = () => {
         role: user.role === 'admin' ? 'Partner' : 'Legal Consultant'
       } : undefined;
 
+      // Start with empty editor content
+      setEditorContent('');
+
       setFormData({
           title: '',
           date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase(),
           summary: '',
           image: '',
           category: '',
-          content: [''],
+          content: [],
           author: defaultAuthor
       });
       setIsArticleModalOpen(true);
@@ -505,6 +550,17 @@ const Admin = () => {
       }
       setEditingArticle(article);
       setFormData({ ...article });
+      
+      // Convert Array content to HTML String for the editor
+      // We wrap paragraphs in <p> if they look like plain text, or join them if they are HTML blocks
+      // For simplicity, we can assume the array contains paragraphs
+      const htmlContent = article.content.map(p => {
+          if (p.trim().startsWith('<')) return p; // Already HTML
+          return `<p>${p}</p>`; // Wrap plain text
+      }).join('');
+      
+      setEditorContent(htmlContent);
+      
       setIsArticleModalOpen(true);
   };
 
@@ -517,7 +573,6 @@ const Admin = () => {
       if(!confirm("Are you sure you want to delete this article?")) return;
 
       const id = article.id;
-      // Optimistic UI: Remove it immediately
       const prevArticles = [...articles];
       setArticles(prev => prev.filter(a => a.id !== id));
 
@@ -531,19 +586,11 @@ const Admin = () => {
           if (error) throw error;
           
           toast.success("Article Deleted");
-          // Re-fetch to sync state just in case
           fetchArticles();
       } catch (error: any) {
-          console.error("Delete error:", error);
-          // If we failed, check if it's a permission issue. 
-          // If so, we might want to keep the local deletion visible if the user really wants it gone from their view,
-          // but strictly speaking we should revert.
-          // However, for better UX in "mixed" states, we can show a warning instead of reverting.
           toast.error("Failed to delete from database", { 
               description: "Permission denied or network error. (Item removed from view)" 
           });
-          // We DO NOT revert state here to satisfy the user who wants it gone from the UI at least.
-          // setArticles(prevArticles); 
       }
   };
 
@@ -553,25 +600,21 @@ const Admin = () => {
       
       const finalImage = formData.image || 'https://picsum.photos/600/400';
       
-      // SECURITY: Sanitize content before payload construction
-      // Note: We're allowing some HTML tags now (b, i, u, ul, li) so we should be careful with sanitization policy
-      // but DOMPurify on display side (UpdateDetail) is the main line of defense.
-      // Here we just sanitize mostly to prevent script injection into DB.
-      const sanitizedContent = (formData.content || []).map(p => DOMPurify.sanitize(p, { ALLOWED_TAGS: ['b', 'i', 'u', 'ul', 'ol', 'li', 'br', 'strong', 'em'] }));
+      // Store the editor content as an array of 1 string (The full HTML blob)
+      // This maintains type compatibility with string[] while allowing full HTML richness
+      const finalContent = [editorContent]; 
+      
       const sanitizedTitle = DOMPurify.sanitize(formData.title || '');
       const sanitizedSummary = DOMPurify.sanitize(formData.summary || '');
 
-      // Determine Author ID logic
       let finalAuthorId = user?.id;
       let finalAuthorObj = formData.author;
 
       if (isAdmin) {
-          // Admin can assign anyone
           if (formData.author?.id) {
               finalAuthorId = formData.author.id;
           }
       } else {
-          // Author MUST be themselves if not admin
           finalAuthorId = user?.id;
           if (user) {
               finalAuthorObj = {
@@ -589,12 +632,11 @@ const Admin = () => {
           summary: sanitizedSummary || '',
           category: formData.category || 'General',
           image: finalImage,
-          content: sanitizedContent,
+          content: finalContent, // Saving HTML content here
           authorId: finalAuthorId,
           author: finalAuthorObj
       };
 
-      // SECURITY: Validate with Zod
       const validationResult = ArticleSchema.safeParse(payload);
       if (!validationResult.success) {
           const errorMessage = validationResult.error.issues[0].message;
@@ -603,9 +645,6 @@ const Admin = () => {
           return;
       }
 
-      // --- ROBUSTNESS: Local State Fallback Helper ---
-      // This ensures that if the database write fails (e.g., RLS policy not set for local user),
-      // the UI still updates, preventing data loss for the user session.
       const updateLocalState = (isError = false) => {
           if (editingArticle) {
               setArticles(prev => prev.map(a => a.id === editingArticle.id ? { ...a, ...payload, id: editingArticle.id } as LegalUpdate : a));
@@ -655,7 +694,6 @@ const Admin = () => {
 
       } catch (error: any) {
           console.error("Save error:", error);
-          // FALLBACK: Update local state so the user doesn't lose their work
           updateLocalState(true);
       } finally {
           setIsSubmitting(false);
@@ -681,19 +719,15 @@ const Admin = () => {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      // SECURITY: Check file type and size on client side
       if (!file.type.startsWith('image/')) {
           toast.error("Invalid file type", { description: "Please upload an image." });
           return;
       }
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 5 * 1024 * 1024) {
           toast.error("File too large", { description: "Image must be under 5MB." });
           return;
       }
 
-      // Check if we are in Mock mode
-      // NOTE: We attempt upload even without a session (Guest/Anon mode) if Supabase is connected.
-      // This supports the "Local User" bypass if Storage Policies allow 'anon' inserts.
       if (isMockMode || !supabase) {
           toast.success("Image Uploaded (Mock Base64)");
           
@@ -708,7 +742,6 @@ const Admin = () => {
       setIsUploadingImage(true);
       try {
           const fileExt = file.name.split('.').pop();
-          // Generate a clean filename to prevent directory traversal attacks
           const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
           const filePath = `${fileName}`;
 
@@ -723,68 +756,17 @@ const Admin = () => {
           setFormData({ ...formData, image: data.publicUrl });
           toast.success("Image Uploaded Successfully");
       } catch (error: any) {
-          console.error("Upload error:", error);
-          
-          // --- FALLBACK MECHANISM ---
           toast.warning("Cloud upload failed. Using local preview.", { 
             description: "Check Storage Policies (Allow 'anon' insert)." 
           });
-          
           const reader = new FileReader();
           reader.onloadend = () => {
               setFormData(prev => ({ ...prev, image: reader.result as string }));
           };
           reader.readAsDataURL(file);
-
       } finally {
           setIsUploadingImage(false);
       }
-  };
-
-  const handleContentChange = (index: number, value: string) => {
-      const newContent = [...(formData.content || [])];
-      newContent[index] = value;
-      setFormData({ ...formData, content: newContent });
-  };
-
-  const addParagraph = () => {
-      setFormData({ ...formData, content: [...(formData.content || []), ''] });
-  };
-
-  const removeParagraph = (index: number) => {
-      const newContent = [...(formData.content || [])];
-      newContent.splice(index, 1);
-      setFormData({ ...formData, content: newContent });
-  };
-
-  // --- RICH TEXT HELPERS ---
-  const insertTag = (index: number, tag: string) => {
-      const textarea = document.getElementById(`content-${index}`) as HTMLTextAreaElement;
-      if (!textarea) return;
-
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const text = textarea.value;
-      const selectedText = text.substring(start, end);
-      
-      let replacement = '';
-      
-      // Determine format
-      switch(tag) {
-          case 'bold': replacement = `<b>${selectedText}</b>`; break;
-          case 'italic': replacement = `<i>${selectedText}</i>`; break;
-          case 'underline': replacement = `<u>${selectedText}</u>`; break;
-          case 'ul': replacement = `\n<ul>\n  <li>${selectedText || 'Item'}</li>\n</ul>\n`; break;
-          case 'ol': replacement = `\n<ol>\n  <li>${selectedText || 'Item'}</li>\n</ol>\n`; break;
-          default: replacement = selectedText;
-      }
-
-      // Insert back into state
-      const newText = text.substring(0, start) + replacement + text.substring(end);
-      handleContentChange(index, newText);
-
-      // Restore focus (optional, usually good UX)
-      setTimeout(() => textarea.focus(), 0);
   };
 
   if (authLoading) return <div className="min-h-screen bg-brand-navy flex items-center justify-center"><Loader2 className="animate-spin text-brand-gold h-10 w-10" /></div>;
@@ -1019,6 +1001,7 @@ const Admin = () => {
 
             {activeTab === 'team' && (
                 <div className="absolute inset-0 overflow-y-auto">
+                     {/* Same Team Tab content as before */}
                      <div className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 shadow-sm sticky top-0 z-30">
                         <div className="flex items-center gap-4">
                             <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-gray-500 hover:text-brand-navy">
@@ -1067,7 +1050,6 @@ const Admin = () => {
                                             <tr key={member.id} className="hover:bg-gray-50 transition-colors group">
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-3">
-                                                        {/* AVATAR UPLOAD SECTION */}
                                                         <div className="relative group/avatar cursor-pointer">
                                                             {isAvatarUploading ? (
                                                                 <div className="w-10 h-10 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
@@ -1090,8 +1072,6 @@ const Admin = () => {
                                                                 </>
                                                             )}
                                                         </div>
-
-                                                        {/* NAME EDIT SECTION */}
                                                         <div>
                                                             {isEditing ? (
                                                                 <div className="flex items-center gap-2">
@@ -1205,7 +1185,7 @@ const Admin = () => {
                          <div className="prose prose-lg prose-headings:font-serif prose-headings:text-brand-navy prose-p:text-gray-600 prose-p:font-light prose-p:leading-loose max-w-none first-letter:text-5xl first-letter:font-serif first-letter:text-brand-gold first-letter:mr-3 first-letter:float-left">
                            <p className="lead font-medium text-xl text-brand-navy italic mb-8 border-l-4 border-brand-gold pl-4">{previewArticle.summary}</p>
                            {previewArticle.content.map((paragraph, idx) => (
-                               <p key={idx} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(paragraph) }}></p>
+                               <div key={idx} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(paragraph) }}></div>
                            ))}
                        </div>
                     </div>
@@ -1233,33 +1213,15 @@ const Admin = () => {
 
                                 <div className="space-y-2"><label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Cover Image</label><div className="bg-gray-50 border border-gray-200 rounded-lg p-4">{formData.image && (<div className="mb-4 relative h-40 w-full rounded-md overflow-hidden border border-gray-200"><img src={formData.image} alt="Preview" className="w-full h-full object-cover" /><button type="button" onClick={() => setFormData({...formData, image: ''})} className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors shadow-sm"><X className="h-3 w-3" /></button></div>)}<div className="flex gap-4 items-start"><div className="flex-1 space-y-2"><label className="text-[10px] uppercase font-bold text-gray-400">Option 1: Paste URL</label><div className="relative"><ImageIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" /><input type="text" value={formData.image && !formData.image.startsWith('http') && !formData.image.startsWith('data') ? '' : formData.image} onChange={e => setFormData({...formData, image: e.target.value})} className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded text-sm focus:border-brand-navy outline-none" placeholder="https://..." /></div></div><div className="w-[1px] bg-gray-200 self-stretch"></div><div className="flex-1 space-y-2"><label className="text-[10px] uppercase font-bold text-gray-400">Option 2: Upload File</label><label className={`flex items-center justify-center gap-2 w-full py-2 bg-white border border-dashed border-gray-300 rounded text-sm text-gray-500 hover:border-brand-gold hover:text-brand-navy cursor-pointer transition-all ${isUploadingImage ? 'opacity-50 cursor-not-allowed' : ''}`}>{isUploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}<span>{isUploadingImage ? 'Uploading...' : 'Choose File'}</span><input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isUploadingImage}/></label></div></div></div></div>
                                 <div className="space-y-1.5"><label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Summary</label><textarea rows={2} value={formData.summary} onChange={e => setFormData({...formData, summary: e.target.value})} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-brand-navy focus:bg-white outline-none" placeholder="Brief description for the card preview..." /></div>
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between"><label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Content Paragraphs</label><button type="button" onClick={addParagraph} className="text-xs text-brand-navy font-bold hover:text-brand-gold flex items-center gap-1">+ Add Paragraph</button></div>
-                                    {formData.content?.map((para, idx) => (
-                                        <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-brand-gold/20 focus-within:border-brand-gold/50 transition-all">
-                                            {/* RICH TEXT TOOLBAR */}
-                                            <div className="flex items-center gap-1 p-2 border-b border-gray-200 bg-gray-100/50">
-                                                <button type="button" onClick={() => insertTag(idx, 'bold')} title="Bold" className="p-1.5 hover:bg-gray-200 rounded text-gray-600 hover:text-black transition-colors"><Bold className="h-3.5 w-3.5" /></button>
-                                                <button type="button" onClick={() => insertTag(idx, 'italic')} title="Italic" className="p-1.5 hover:bg-gray-200 rounded text-gray-600 hover:text-black transition-colors"><Italic className="h-3.5 w-3.5" /></button>
-                                                <button type="button" onClick={() => insertTag(idx, 'underline')} title="Underline" className="p-1.5 hover:bg-gray-200 rounded text-gray-600 hover:text-black transition-colors"><Underline className="h-3.5 w-3.5" /></button>
-                                                <div className="w-[1px] h-4 bg-gray-300 mx-1"></div>
-                                                <button type="button" onClick={() => insertTag(idx, 'ul')} title="Bullet List" className="p-1.5 hover:bg-gray-200 rounded text-gray-600 hover:text-black transition-colors"><List className="h-3.5 w-3.5" /></button>
-                                                <button type="button" onClick={() => insertTag(idx, 'ol')} title="Numbered List" className="p-1.5 hover:bg-gray-200 rounded text-gray-600 hover:text-black transition-colors"><ListOrdered className="h-3.5 w-3.5" /></button>
-                                                
-                                                {formData.content!.length > 1 && (
-                                                    <button type="button" onClick={() => removeParagraph(idx)} className="ml-auto text-gray-400 hover:text-red-500 p-1.5 hover:bg-red-50 rounded transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
-                                                )}
-                                            </div>
-                                            <textarea 
-                                                id={`content-${idx}`}
-                                                rows={4} 
-                                                value={para} 
-                                                onChange={e => handleContentChange(idx, e.target.value)} 
-                                                className="w-full px-4 py-3 bg-transparent border-none outline-none text-sm resize-y" 
-                                                placeholder={`Paragraph ${idx + 1} content...`} 
-                                            />
-                                        </div>
-                                    ))}
+                                
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Article Content</label>
+                                    <RichTextEditor 
+                                        value={editorContent}
+                                        onChange={setEditorContent}
+                                        placeholder="Write your article here..."
+                                    />
+                                    <p className="text-[10px] text-gray-400 text-right">Use the toolbar to format text (Bold, Lists, etc.)</p>
                                 </div>
                             </form>
                         </div>
@@ -1267,27 +1229,6 @@ const Admin = () => {
                             <button onClick={() => setIsArticleModalOpen(false)} className="px-5 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:bg-gray-200 transition-all">Cancel</button>
                             <button type="submit" form="articleForm" disabled={isSubmitting || isUploadingImage} className="bg-brand-navy text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg hover:bg-brand-gold transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">{isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{isSubmitting ? 'Saving...' : 'Save Article'}</button>
                         </div>
-                    </MotionDiv>
-                </div>
-            )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-            {isInviteModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <MotionDiv initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={resetInviteForm} className="absolute inset-0 bg-brand-navy/60 backdrop-blur-sm" />
-                    <MotionDiv initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="bg-white w-full max-w-sm rounded-xl shadow-2xl relative z-10 p-6">
-                        <h3 className="text-xl font-serif font-bold text-brand-navy mb-4">Invite New Member</h3>
-                        <form onSubmit={handleInvite} className="space-y-4">
-                            <div className="space-y-1.5"><label className="text-[10px] uppercase font-bold text-gray-500">Full Name</label><input type="text" value={inviteName} onChange={e => setInviteName(e.target.value)} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded text-sm focus:border-brand-navy outline-none" required placeholder="John Doe" /></div>
-                            <div className="space-y-1.5"><label className="text-[10px] uppercase font-bold text-gray-500">Email Address</label><input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded text-sm focus:border-brand-navy outline-none" required placeholder="john@dagrand.net" /></div>
-                            <div className="space-y-1.5"><label className="text-[10px] uppercase font-bold text-gray-500">Temporary Password</label><div className="relative"><input type={showInvitePassword ? "text" : "password"} value={invitePassword} onChange={e => setInvitePassword(e.target.value)} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded text-sm focus:border-brand-navy outline-none pr-10" required minLength={6} /><button type="button" onClick={() => setShowInvitePassword(!showInvitePassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-navy">{showInvitePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div></div>
-                            <div className="space-y-1.5"><label className="text-[10px] uppercase font-bold text-gray-500">Role</label><select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded text-sm focus:border-brand-navy outline-none"><option value="editor">Editor (Can create content)</option><option value="admin">Admin (Full Access)</option></select></div>
-                            <div className="pt-4 flex justify-end gap-3">
-                                <button type="button" onClick={resetInviteForm} className="px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded">Cancel</button>
-                                <button type="submit" disabled={isInviting} className="px-6 py-2 bg-brand-navy text-white text-sm font-bold rounded shadow hover:bg-brand-gold transition-colors disabled:opacity-50 flex items-center gap-2">{isInviting ? <Loader2 className="animate-spin h-4 w-4" /> : <Plus className="h-4 w-4" />}{isInviting ? 'Inviting...' : 'Send Invite'}</button>
-                            </div>
-                        </form>
                     </MotionDiv>
                 </div>
             )}
