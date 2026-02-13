@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, MapPin, Phone, Mail, Clock, Linkedin, ChevronRight, Settings, Moon, Sun, Home, Info, Users, Briefcase, FileText } from 'lucide-react';
@@ -410,33 +411,39 @@ const Footer = () => {
                   </ul>
               </div>
 
-              {/* Column 3: Contact */}
-              <div className="lg:col-span-2">
+              {/* Column 3: Our Office (Address & Hours) */}
+              <div>
+                  <h3 className="text-white font-serif font-bold text-lg mb-6">{t('ourOffice')}</h3>
+                  <div className="space-y-4 text-sm">
+                      <div className="flex items-start gap-3">
+                          <MapPin className="h-5 w-5 text-brand-gold shrink-0 mt-0.5" />
+                          <span className="leading-relaxed">{address}</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                          <Clock className="h-5 w-5 text-brand-gold shrink-0 mt-0.5" />
+                          <span>{hours}</span>
+                      </div>
+                  </div>
+              </div>
+
+              {/* Column 4: Contact Info (Phone & Email) */}
+              <div>
                   <h3 className="text-white font-serif font-bold text-lg mb-6">{t('contactInfo')}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                      <div className="space-y-4">
-                          <div className="flex items-start gap-3">
-                              <MapPin className="h-5 w-5 text-brand-gold shrink-0 mt-0.5" />
-                              <span>{address}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                              <Clock className="h-5 w-5 text-brand-gold shrink-0" />
-                              <span>{hours}</span>
+                  <div className="space-y-4 text-sm">
+                      <div className="flex items-start gap-3">
+                          <Phone className="h-5 w-5 text-brand-gold shrink-0 mt-0.5" />
+                          <div className="flex flex-col gap-1">
+                              {CONTACT_INFO.phones.map((phone, idx) => (
+                                  <span key={idx} className="hover:text-white transition-colors cursor-default">
+                                      <span className="text-xs text-gray-500 mr-2 uppercase">{phone.label}:</span>
+                                      {phone.number}
+                                  </span>
+                              ))}
                           </div>
                       </div>
-                      <div className="space-y-4">
-                          <div className="flex items-start gap-3">
-                              <Phone className="h-5 w-5 text-brand-gold shrink-0 mt-0.5" />
-                              <div className="flex flex-col gap-1">
-                                  {CONTACT_INFO.phones.map((phone, idx) => (
-                                      <span key={idx} className="hover:text-white transition-colors cursor-default"><span className="text-xs text-gray-500 mr-2 uppercase">{phone.label}:</span>{phone.number}</span>
-                                  ))}
-                              </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                              <Mail className="h-5 w-5 text-brand-gold shrink-0" />
-                              <a href={`mailto:${CONTACT_INFO.email}`} className="hover:text-white transition-colors underline decoration-transparent hover:decoration-brand-gold underline-offset-4 duration-300">{CONTACT_INFO.email}</a>
-                          </div>
+                      <div className="flex items-center gap-3">
+                          <Mail className="h-5 w-5 text-brand-gold shrink-0" />
+                          <a href={`mailto:${CONTACT_INFO.email}`} className="hover:text-white transition-colors underline decoration-transparent hover:decoration-brand-gold underline-offset-4 duration-300">{CONTACT_INFO.email}</a>
                       </div>
                   </div>
               </div>
@@ -445,8 +452,8 @@ const Footer = () => {
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
               <p>&copy; {new Date().getFullYear()} Dagrand Law Office. {t('rightsReserved')}</p>
               <div className="flex gap-6">
-                  <span className="hover:text-gray-300 cursor-pointer transition-colors">{t('privacyPolicy')}</span>
-                  <span className="hover:text-gray-300 cursor-pointer transition-colors">{t('termsOfService')}</span>
+                  <Link to="/privacy-policy" className="hover:text-gray-300 cursor-pointer transition-colors">{t('privacyPolicy')}</Link>
+                  <Link to="/terms-of-service" className="hover:text-gray-300 cursor-pointer transition-colors">{t('termsOfService')}</Link>
                   <Link to="/admin" className="hover:text-brand-gold cursor-pointer transition-colors">{t('adminLogin')}</Link>
               </div>
           </div>
