@@ -17,6 +17,7 @@ import Contact from './src/pages/Contact';
 import NotFound from './src/pages/NotFound';
 import Admin from './src/pages/Admin';
 import PrivacyPolicy from './src/pages/PrivacyPolicy';
+import TermsOfService from './src/pages/TermsOfService';
 
 // Component to handle public page transitions
 const PublicContent = () => {
@@ -35,6 +36,7 @@ const PublicContent = () => {
           <Route path="/updates/:id" element={<PageTransition><UpdateDetail /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
           <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+          <Route path="/terms-of-service" element={<PageTransition><TermsOfService /></PageTransition>} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </AnimatePresence>
