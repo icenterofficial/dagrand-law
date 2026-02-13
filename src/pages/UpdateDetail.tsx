@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, Share2, Clock, Check, Facebook, Linkedin, Link as LinkIcon, X, User, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Share2, Clock, Check, Facebook, Linkedin, Link as LinkIcon, X, User, AlertTriangle } from 'lucide-react';
 import { Section } from '../components/Section';
 import { SEO } from '../components/SEO';
 import { useLegalUpdates } from '../hooks/useLegalUpdates';
@@ -9,7 +9,6 @@ import { Skeleton } from '../components/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useLanguage } from '../contexts/LanguageContext';
-import DOMPurify from 'dompurify';
 
 const MotionDiv = motion.div as any;
 
@@ -37,7 +36,7 @@ const UpdateDetail = () => {
   const { updates, loading } = useLegalUpdates();
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const { t, getContent } = useLanguage();
+  const { t } = useLanguage();
   
   const update = updates.find((u) => u.id === id);
 
@@ -169,15 +168,11 @@ const UpdateDetail = () => {
     "description": update.summary
   };
 
-  const title = getContent(update.title, update.title_cn);
-  const summary = getContent(update.summary, update.summary_cn);
-  const content = getContent(update.content, update.content_cn);
-
   return (
     <div className="bg-white dark:bg-brand-dark min-h-screen transition-colors duration-300">
        <SEO 
-         title={title}
-         description={summary}
+         title={update.title}
+         description={update.summary}
          image={update.image}
          type="article"
          schema={articleSchema}
@@ -187,7 +182,7 @@ const UpdateDetail = () => {
        <div className="relative h-[60vh] min-h-[400px]">
            <img 
              src={update.image} 
-             alt={title} 
+             alt={update.title} 
              className="w-full h-full object-cover"
            />
            <div className="absolute inset-0 bg-brand-navy/60 mix-blend-multiply"></div>
@@ -202,7 +197,7 @@ const UpdateDetail = () => {
                         <span className="mx-2 text-white/40">/</span>
                         <Link to="/updates" className="hover:text-white transition-colors">Legal Updates</Link>
                         <span className="mx-2 text-white/40">/</span>
-                        <span className="text-brand-gold">{title}</span>
+                        <span className="text-brand-gold">{update.title}</span>
                      </span>
                    </div>
 
@@ -211,7 +206,7 @@ const UpdateDetail = () => {
                    </Link>
                    
                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-6 leading-tight max-w-4xl drop-shadow-lg">
-                       {title}
+                       {update.title}
                    </h1>
                    <div className="flex flex-wrap items-center gap-6 text-white/90 text-sm font-medium">
                        <div className="flex items-center gap-2">
@@ -239,41 +234,18 @@ const UpdateDetail = () => {
                {/* Main Content */}
                <div className="lg:col-span-8">
                    <Section>
-                       {/* Intro Summary - Often bold or emphasized */}
-                       <div className="mb-10 p-6 bg-brand-gray/30 dark:bg-white/5 border-l-4 border-brand-gold rounded-r-lg">
-                            <p className="font-serif text-xl text-brand-navy dark:text-white italic text-justify leading-relaxed">
-                                {summary}
-                            </p>
-                       </div>
-
-                       {/* Article Body - Rendering HTML Safely */}
-                       <div className="prose prose-lg dark:prose-invert prose-headings:font-serif prose-headings:text-brand-navy dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-300 prose-p:font-light prose-p:leading-loose prose-a:text-brand-gold hover:prose-a:text-brand-navy max-w-none">
-                           {content.map((paragraph: string, idx: number) => (
-                               // Use dangerouslySetInnerHTML to render HTML tags like <b>, <i>, <ul>, etc.
-                               <div 
-                                    key={idx} 
-                                    className="mb-6 text-justify leading-loose text-gray-700 dark:text-gray-300 font-light"
-                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(paragraph) }}
-                               />
+                       <div className="prose prose-lg dark:prose-invert prose-headings:font-serif prose-headings:text-brand-navy dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-300 prose-p:font-light prose-p:leading-loose prose-a:text-brand-gold hover:prose-a:text-brand-navy max-w-none first-letter:text-5xl first-letter:font-serif first-letter:text-brand-gold first-letter:mr-3 first-letter:float-left">
+                           <p className="lead font-medium text-xl text-brand-navy dark:text-white italic mb-8 border-l-4 border-brand-gold pl-4 text-justify leading-loose">
+                               {update.summary}
+                           </p>
+                           {update.content.map((paragraph, idx) => (
+                               <p key={idx} className="mb-8 text-justify leading-loose text-gray-700 dark:text-gray-300 font-light">{paragraph}</p>
                            ))}
                        </div>
                         
-                        {/* Legal Disclaimer */}
-                        <div className="mt-16 p-6 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg">
-                            <div className="flex items-start gap-4">
-                                <AlertCircle className="h-6 w-6 text-brand-navy dark:text-gray-400 shrink-0 mt-1" />
-                                <div>
-                                    <h4 className="font-bold text-brand-navy dark:text-gray-200 mb-2 text-sm uppercase tracking-wider">{t('disclaimerTitle')}</h4>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 italic leading-relaxed text-justify">
-                                        {t('disclaimerBody')}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Author Card (Bottom of Post) */}
                         {update.author && (
-                            <div className="mt-12 p-8 bg-brand-gray dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-sm flex items-center gap-6">
+                            <div className="mt-16 p-8 bg-brand-gray dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-sm flex items-center gap-6">
                                 <img src={update.author.avatar} alt={update.author.name} className="w-20 h-20 rounded-full border-2 border-brand-gold object-cover shadow-md" />
                                 <div>
                                     <div className="text-brand-gold font-bold uppercase tracking-widest text-xs mb-1">Written By</div>
@@ -325,6 +297,20 @@ const UpdateDetail = () => {
                                </AnimatePresence>
                            </div>
                        </div>
+
+                       {/* Disclaimer Section */}
+                       <div className="mt-12 p-6 bg-gray-50 dark:bg-white/5 border-l-4 border-gray-300 dark:border-gray-600 rounded-r-sm">
+                           <div className="flex items-start gap-3">
+                               <AlertTriangle className="h-5 w-5 text-gray-400 shrink-0 mt-0.5" />
+                               <div>
+                                   <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">{t('disclaimerTitle')}</h4>
+                                   {/* Updated to check for legalDisclaimerContent to fix caching issue */}
+                                   <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-justify font-light">
+                                       {t('legalDisclaimerContent' as any)}
+                                   </p>
+                               </div>
+                           </div>
+                       </div>
                    </Section>
                </div>
 
@@ -341,7 +327,7 @@ const UpdateDetail = () => {
                                    <Link key={rel.id} to={`/updates/${rel.id}`} className="block group">
                                        <span className="text-xs font-bold text-gray-400 block mb-1">{rel.date}</span>
                                        <h4 className="font-serif font-bold text-brand-navy dark:text-white group-hover:text-brand-gold transition-colors line-clamp-2 leading-snug">
-                                           {getContent(rel.title, rel.title_cn)}
+                                           {rel.title}
                                        </h4>
                                    </Link>
                                ))}
