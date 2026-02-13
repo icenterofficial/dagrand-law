@@ -198,7 +198,7 @@ const Contact = () => {
             width="100%" 
             height="100%" 
             id="gmap_canvas" 
-            src="https://maps.google.com/maps?q=Street+51+corner+Street+334,+Phnom+Penh&t=&z=17&ie=UTF8&iwloc=&output=embed" 
+            src="https://maps.google.com/maps?q=Dagrand+Law+Office,+Phnom+Penh&t=&z=17&ie=UTF8&iwloc=&output=embed" 
             frameBorder="0" 
             scrolling="no" 
             marginHeight={0} 
