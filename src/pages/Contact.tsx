@@ -6,7 +6,6 @@ import { CONTACT_INFO } from '../../constants';
 import { PageHeader } from '../components/PageHeader';
 import { SEO } from '../components/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
-import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
 
 const MotionDiv = motion.div as any;
@@ -29,37 +28,39 @@ const Contact = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (!supabase) {
-        // Fallback for demo mode without backend
-        setTimeout(() => {
-            toast.success("Message Sent (Demo)", { description: "In a real app, this would go to Telegram." });
-            setFormData({ name: '', email: '', subject: '', message: '' });
-            setIsSubmitting(false);
-        }, 1500);
-        return;
-    }
+    // Construct Mailto Link to send directly to info@dagrand.net
+    const recipient = CONTACT_INFO.email;
+    const subjectLine = formData.subject 
+        ? `[Website Inquiry] ${formData.subject}` 
+        : `New Message from ${formData.name}`;
+    
+    const bodyContent = `Dear Dagrand Law Office Team,
 
-    try {
-        const { data, error } = await supabase.functions.invoke('contact-form', {
-            body: formData
+${formData.message}
+
+------------------------------------------------
+Sender Details:
+Name: ${formData.name}
+Email: ${formData.email}
+`;
+
+    const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subjectLine)}&body=${encodeURIComponent(bodyContent)}`;
+
+    // Simulate processing delay for better UX
+    setTimeout(() => {
+        window.location.href = mailtoLink;
+        
+        toast.success(t('sendBtn') + "...", { 
+            description: "Opening your email client. Please click 'Send' to complete." 
         });
-
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-
-        toast.success(t('sendBtn') + " Success!", { description: "We have received your message." });
+        
         setFormData({ name: '', email: '', subject: '', message: '' }); // Reset form
-
-    } catch (error: any) {
-        console.error("Submission error:", error);
-        toast.error("Failed to send message", { description: "Please try again or email us directly." });
-    } finally {
         setIsSubmitting(false);
-    }
+    }, 1000);
   };
 
   return (
@@ -185,7 +186,7 @@ const Contact = () => {
                         className="bg-brand-gold text-white font-bold py-4 px-8 uppercase tracking-widest text-sm hover:bg-brand-navy transition-all duration-300 w-full md:w-auto flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin h-4 w-4" /> : <Send className="h-4 w-4" />}
-                        {isSubmitting ? 'Sending...' : t('sendBtn')}
+                        {isSubmitting ? 'Opening Email...' : t('sendBtn')}
                     </button>
                 </form>
             </div>
